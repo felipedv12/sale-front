@@ -3,11 +3,11 @@ import { Button, Image, Table } from "react-bootstrap";
 import { API_URL } from '../../../constants/api';
 import deleteIcon from '../../../assets/images/delete.png';
 import editIcon from '../../../assets/images/edit.png';
-import ProductForm from "./ProductForm";
+import ProductTypeForm from "./ProductTypeForm";
 import DeleteConfirmationModal from "../../common/DeleteConfirmationModal";
 import Alert from "../../common/Alert";
 
-class Products extends React.Component {
+class ProductTypes extends React.Component {
     constructor(props) {
         super(props);
 
@@ -39,7 +39,7 @@ class Products extends React.Component {
     }
 
     handleShowForm = () => {
-        this.setState({ showForm: true, formMode: 'create', formData: {}, formTitle: 'Novo produto' });
+        this.setState({ showForm: true, formMode: 'create', formData: {}, formTitle: 'Novo tipo de produto' });
     };
 
     handleHideForm = () => {
@@ -58,7 +58,7 @@ class Products extends React.Component {
     }
 
     handleEdit = (product) => {
-        this.setState({ showForm: true, formMode: 'edit', formData: product, formTitle: 'Alterar produto: ' + product.name });
+        this.setState({ showForm: true, formMode: 'edit', formData: product, formTitle: 'Alterar tipo de produto: ' + product.name });
     };
 
     handleShowAlert = () => {
@@ -71,16 +71,16 @@ class Products extends React.Component {
 
     handleDeleteSuccess = () => {
         this.search();
-        this.setState({ titleAlert: 'Sucesso', messageAlert: 'Produto excluído com sucesso.', typeAlert: 'alert alert-success', showAlert: true });
+        this.setState({ titleAlert: 'Sucesso', messageAlert: 'Tipo de produto excluído com sucesso.', typeAlert: 'alert alert-success', showAlert: true });
     }
 
     handleDeleteError = () => {
         this.search();
-        this.setState({ titleAlert: 'Erro', messageAlert: 'Tivemos um problema ao excluir o produto, tente novamente.', typeAlert: 'alert alert-danger', showAlert: true });
+        this.setState({ titleAlert: 'Erro', messageAlert: 'Tivemos um problema ao excluir o tipo de produto, tente novamente.', typeAlert: 'alert alert-danger', showAlert: true });
     }
 
     search = () => {
-        fetch(API_URL + '/products')
+        fetch(API_URL + '/product-types')
             .then(res => res.json())
             .then(
                 (result) => {
@@ -98,29 +98,25 @@ class Products extends React.Component {
         if (this.state.data.length === 0) {
             tableContent = (
                 <tr className="text-center">
-                    <td colSpan="8">Não há registros.</td>
+                    <td colSpan="4">Não há registros.</td>
                 </tr>
             );
         } else {
-            tableContent = this.state.data.map((product) => (
-                <tr key={product.id}>
-                    <td className="align-middle">{product.name}</td>
-                    <td className="align-middle">{product.barcode}</td>
-                    <td className="align-middle">{product.description}</td>
-                    <td className="align-middle text-center">{product.price}</td>
-                    <td className="align-middle text-center">{product.productType.name}</td>
-                    <td className="align-middle text-center">{product.productType.taxPercentage}</td>
+            tableContent = this.state.data.map((productType) => (
+                <tr key={productType.id}>
+                    <td className="align-middle">{productType.name}</td>
+                    <td className="align-middle text-center">{productType.taxPercentage}</td>
                     <td className="align-middle text-center">
-                        <Button variant="link" onClick={() => this.handleDelete(product.id)} disabled={!product.allowDelete}>
+                        <Button variant="link" onClick={() => this.handleDelete(productType.id)} disabled={!productType.allowDelete}>
                             <Image src={deleteIcon} alt="Excluir" width={15} height={15} />
                         </Button>
 
-                        <Button variant="link" onClick={() => this.handleEdit(product)} disabled={!product.allowDelete}>
+                        <Button variant="link" onClick={() => this.handleEdit(productType)} disabled={!productType.allowDelete}>
                             <Image src={editIcon} alt="Alterar" width={15} height={15} />
                         </Button>
 
                     </td>
-                    <td className="align-middle text-center">{!product.allowDelete ? 'Produto em uso' : ''}</td>
+                    <td className="align-middle text-center">{!productType.allowDelete ? 'Tipo de produto em uso' : ''}</td>
                 </tr>
             ));
         }
@@ -142,9 +138,9 @@ class Products extends React.Component {
                     }
                 </div>
                 {this.state.showForm &&
-                    <ProductForm
+                    <ProductTypeForm
                         mode={this.state.formMode}
-                        product={this.state.formData}
+                        productType={this.state.formData}
                         show={this.state.showForm}
                         onHide={this.handleHideForm}
                         title={this.state.formTitle}
@@ -161,22 +157,18 @@ class Products extends React.Component {
                     handleSuccess={this.handleDeleteSuccess}
                     handleError={this.handleDeleteError}
                     id={this.state.deleteId}
-                    route="/products"
+                    route="/product-types"
 
                 />
                 }
 
-                <Button className="btn-primary" onClick={this.handleShowForm}>Novo produto</Button>
+                <Button className="btn-primary" onClick={this.handleShowForm}>Novo tipo de produto</Button>
                 <hr></hr>
 
                 <Table striped bordered hover size="lg">
                     <thead>
                         <tr>
                             <th>Nome</th>
-                            <th>Código de barras</th>
-                            <th>Descrição</th>
-                            <th className="text-center">Preço</th>
-                            <th className="text-center">Tipo</th>
                             <th className="text-center">Percentual de impostos</th>
                             <th className="text-center">Opções</th>
                             <th className="text-center">Observação</th>
@@ -191,4 +183,4 @@ class Products extends React.Component {
     }
 }
 
-export default Products;
+export default ProductTypes;
