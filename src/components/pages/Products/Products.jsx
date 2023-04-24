@@ -4,6 +4,8 @@ import { API_URL } from '../../../constants/api';
 import deleteIcon from '../../../assets/images/delete.png';
 import editIcon from '../../../assets/images/edit.png';
 import ProductForm from "./ProductForm";
+import DeleteConfirmationModal from "../../common/DeleteConfirmationModal";
+import Alert from "../../common/Alert";
 
 class Products extends React.Component {
     constructor(props) {
@@ -12,10 +14,16 @@ class Products extends React.Component {
         this.state = {
             data: [],
             showForm: false,
+            showConfirmationModal: false,
+            deleteId: 0,
             formMode: '',
             formData: {},
             buttonLabel: '',
-            formTitle: ''
+            formTitle: '',
+            showAlert: false,
+            titleAlert: '',
+            messageAlert: '',
+            typeAlert: '',
         };
 
     }
@@ -38,9 +46,39 @@ class Products extends React.Component {
         this.setState({ showForm: false });
     };
 
+    handleDelete = (id) => {
+        this.setState({
+            deleteId: id,
+            showConfirmationModal: true
+        });
+    }
+
+    handleHideConfirmation = () => {
+        this.setState({ showConfirmationModal: false });
+    }
+
     handleEdit = (product) => {
-        this.setState({ showForm: true, formMode: 'edit', formData: product, formTitle: 'Alterar produto: '+ product.name  });
+        this.setState({ showForm: true, formMode: 'edit', formData: product, formTitle: 'Alterar produto: ' + product.name });
     };
+
+    handleShowAlert = () => {
+        this.setState({ showAlert: true });
+    }
+
+    handleCloseAlert = () => {
+        this.setState({ showAlert: false });
+    }
+
+    handleDeleteSuccess = () => {
+        this.search();
+        this.setState({ titleAlert: 'Sucesso', messageAlert: 'Produto excluído com sucesso.', typeAlert: 'alert alert-success', showAlert: true });
+    }
+
+    handleDeleteError = () => {
+        this.search();
+        this.setState({ titleAlert: 'Erro', messageAlert: 'Tivemos um problema ao excluir o produto, tente novamente.', typeAlert: 'alert alert-danger', showAlert: true });
+    }
+
     search = () => {
         fetch(API_URL + '/products')
             .then(res => res.json())
@@ -52,26 +90,6 @@ class Products extends React.Component {
                     console.log(error);
                 }
             );
-    }
-
-    delete = (id) => {
-        let errorMessage;
-        /*fetch(API_URL + '/products/' + id, { method: 'DELETE' })
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    if (result.success) {
-                        this.search();
-                    }
-                    else {
-                        errorMessage = result.message;
-                    }
-                },
-                (error) => {
-                    console.log(error);
-                }
-            );*/
-        console.log('teste');
     }
 
     render() {
@@ -93,7 +111,7 @@ class Products extends React.Component {
                     <td className="align-middle text-center">{product.productType.name}</td>
                     <td className="align-middle text-center">{product.productType.taxPercentage}</td>
                     <td className="align-middle text-center">
-                        <Button variant="link" onClick={() => this.delete(product.id)}>
+                        <Button variant="link" onClick={() => this.handleDelete(product.id)}>
                             <Image src={deleteIcon} alt="Excluir" width={15} height={15} />
                         </Button>
 
@@ -106,8 +124,22 @@ class Products extends React.Component {
             ));
         }
 
+
         return (
             <div className="m-3">
+                <div>
+
+
+                    {this.state.showAlert && 
+                    <Alert
+                        show={this.state.showAlert}
+                        handleClose={this.handleCloseAlert}
+                        title={this.state.titleAlert}
+                        message={this.state.messageAlert}
+                        type={this.state.typeAlert}
+                    />
+                    }
+                </div>
                 {this.state.showForm &&
                     <ProductForm
                         mode={this.state.formMode}
@@ -116,8 +148,21 @@ class Products extends React.Component {
                         onHide={this.handleHideForm}
                         title={this.state.formTitle}
                         buttonLabel={this.state.buttonLabel}
-                
+                        onSuccess={this.search}
+
                     />
+                }
+
+                {this.state.showConfirmationModal && <DeleteConfirmationModal
+                    show={this.state.showConfirmationModal}
+                    onHide={this.handleHideConfirmation}
+                    handleCancel={this.handleHideConfirmation}
+                    handleSuccess={this.handleDeleteSuccess}
+                    handleError={this.handleDeleteError}
+                    id={this.state.deleteId}
+                    route="/products"
+
+                />
                 }
 
                 <Button className="btn-primary" onClick={this.handleShowForm}>Novo produto</Button>
